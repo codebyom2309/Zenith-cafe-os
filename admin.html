@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zenith Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Admin Specific Styles */
+    body { background: var(--bg-color); }
+    
+    .admin-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      padding: 16px 24px;
+      background: var(--surface-color);
+      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .filter-btn.active {
+      background: var(--text-main);
+      color: white;
+      border-color: var(--text-main);
+    }
+
+    .dashboard-grid {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .order-card {
+      background: var(--surface-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border: 1px solid transparent;
+    }
+
+    /* Highlight New Orders */
+    .order-card[data-status="New"] {
+      border-color: var(--status-new-text);
+      box-shadow: 0 4px 16px rgba(25, 103, 210, 0.1);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .table-num { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+    .order-time { font-size: 0.8rem; color: var(--text-muted); }
+
+    .order-items { list-style: none; flex: 1; }
+    .order-items li {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 0.95rem;
+      border-bottom: 1px dashed var(--border-color);
+    }
+    .order-items li:last-child { border-bottom: none; }
+    
+    .notes-box {
+      background: var(--status-prep);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      color: var(--status-prep-text);
+      margin-top: 8px;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .btn-status {
+      flex: 1;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .btn-prep { background: var(--status-prep); color: var(--status-prep-text); }
+    .btn-ready { background: var(--status-ready); color: var(--status-ready-text); }
+    .btn-serve { background: var(--bg-color); color: var(--text-muted); border: 1px solid var(--border-color); }
+  </style>
+</head>
+<body>
+
+  <div class="admin-layout">
+    <header>
+      <div class="logo">Zenith Admin Dashboard</div>
+      <div class="table-badge">Kitchen Display</div>
+    </header>
+
+    <div class="toolbar" id="filters">
+      <button class="filter-btn active" onclick="setFilter('All')">All Active</button>
+      <button class="filter-btn" onclick="setFilter('New')">New</button>
+      <button class="filter-btn" onclick="setFilter('Preparing')">Preparing</button>
+      <button class="filter-btn" onclick="setFilter('Ready')">Ready</button>
+    </div>
+
+    <div class="dashboard-grid" id="orders-grid">
+      </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
