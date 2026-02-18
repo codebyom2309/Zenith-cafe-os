@@ -1,1 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Zenith Cafe | Menu</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Customer Specific Styles */
+    .layout {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
 
+    .main-content {
+      flex: 1;
+      padding: 24px 16px;
+      padding-bottom: 120px; /* Space for mobile cart */
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Tabs */
+    .category-tabs {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 16px;
+      scrollbar-width: none;
+    }
+    .category-tabs::-webkit-scrollbar { display: none; }
+    
+    .tab {
+      padding: 8px 16px;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      white-space: nowrap;
+      color: var(--text-muted);
+    }
+    .tab.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    /* Menu Grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .menu-card {
+      background: var(--surface-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .menu-card:active { transform: scale(0.98); }
+
+    .menu-card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      background: var(--bg-color);
+    }
+
+    .card-content {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-content h3 { font-size: 1rem; margin-bottom: 4px; }
+    .card-content p { font-size: 0.8rem; margin-bottom: 12px; flex: 1; }
+    
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+    .price { font-weight: 600; color: var(--text-main); }
+
+    /* Cart Panel (Mobile Bottom Sheet / Desktop Sidebar) */
+    .cart-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: var(--surface-color);
+      box-shadow: var(--shadow-float);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding: 24px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-panel.open { transform: translateY(0); }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .cart-items {
+      overflow-y: auto;
+      flex: 1;
+      margin-bottom: 16px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-color);
+      padding: 4px;
+      border-radius: 20px;
+    }
+
+    .cart-summary {
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+    }
+    
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    /* Floating Cart Pill (Mobile) */
+    .cart-pill {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text-main);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 30px;
+      box-shadow: var(--shadow-float);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 90%;
+      max-width: 400px;
+      z-index: 999;
+      cursor: pointer;
+    }
+
+    /* Desktop overrides */
+    @media (min-width: 1024px) {
+      .layout { flex-direction: row; }
+      .main-content { padding-right: 360px; max-width: 1000px; }
+      .cart-pill { display: none; }
+      .cart-panel {
+        transform: translateY(0);
+        width: 340px;
+        right: 0;
+        left: auto;
+        top: 0;
+        height: 100vh;
+        border-radius: 0;
+        border-left: 1px solid var(--border-color);
+        box-shadow: -4px 0 24px rgba(0,0,0,0.02);
+      }
+      .cart-header .close-cart { display: none; }
+    }
+
+    /* Overlay / Modals */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 998;
+    }
+    .overlay.active { opacity: 1; pointer-events: all; }
+    
+    #success-state { display: none; text-align: center; padding: 40px 20px; }
+  </style>
+</head>
+<body>
+
+  <div class="layout" id="order-app">
+    <header>
+      <div class="logo">Zenith Cafe</div>
+      <div class="table-badge" id="table-display">Table --</div>
+    </header>
+
+    <main class="main-content">
+      <div class="category-tabs" id="category-tabs">
+        </div>
+      
+      <div class="menu-grid" id="menu-grid">
+        </div>
+
+      <div id="success-state">
+        <h2 style="color: var(--primary-color); margin-bottom: 8px;">Order Placed!</h2>
+        <p>Your order is sent to the kitchen. Hang tight!</p>
+        <div style="margin-top: 24px; padding: 16px; background: var(--surface-color); border-radius: var(--radius-md);">
+          <h3>Status: <span class="badge" style="background: var(--status-new); color: var(--status-new-text);">Received</span></h3>
+        </div>
+      </div>
+    </main>
+
+    <div class="cart-pill" id="cart-pill" onclick="toggleCart()">
+      <span>🛒 <span id="pill-count">0</span> Items</span>
+      <span id="pill-total">$0.00</span>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="toggleCart()"></div>
+
+    <aside class="cart-panel" id="cart-panel">
+      <div class="cart-header">
+        <h2>Your Order</h2>
+        <button class="btn-icon close-cart" onclick="toggleCart()">✕</button>
+      </div>
+      
+      <div class="cart-items" id="cart-items">
+        <p style="text-align: center; margin-top: 40px; color: var(--text-muted);">Your cart is empty.</p>
+      </div>
+
+      <div class="cart-summary">
+        <textarea id="order-notes" rows="2" placeholder="Any special instructions? (e.g., Oat milk, extra hot)"></textarea>
+        <div class="total-row" style="margin-top: 16px;">
+          <span>Total</span>
+          <span id="cart-total">$0.00</span>
+        </div>
+        <button class="btn-primary" onclick="placeOrder()">Place Order</button>
+      </div>
+    </aside>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
